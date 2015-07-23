@@ -182,12 +182,23 @@ func (r watcherImpl) createNodesWatch() (watch.Interface, error) {
 // createClient: creates a new client to speak to the kubernetes api service
 func (r *watcherImpl) createClient() (*client.Client, error) {
 	// step: create the configuration
-	config := client.Config{
-		Host:    getKubernetesURL(),
-		Version: config.APIVersion,
+	kubecfg := client.Config{
+		Host:     getKubernetesURL(),
+		Insecure: config.HttpInsecure,
+		Version:  config.APIVersion,
 	}
+	if config.TokenFile != "" {
+		kubecfg.BearerToken = config.TokenFile
+	}
+	if config.CaCertFile != "" {
+		kubecfg.Insecure = false
+		kubecfg.TLSClientConfig = client.TLSClientConfig{
+			CAFile: config.CaCertFile,
+		}
+	}
+
 	// step: initialize the client
-	kube, err := client.New(&config)
+	kube, err := client.New(&kubecfg)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create a kubernetes api client, reason: %s", err)
 	}
