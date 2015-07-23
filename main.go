@@ -140,7 +140,7 @@ func generateNodesConfiguration() ([]byte, error) {
 	tgroups := make([]*Targets, 0)
 	tgroups = append(tgroups, NewTarget())
 	for _, node := range nodes {
-		tgroups[0].Targets = append(tgroups[0].Targets, node.ID)
+		tgroups[0].Targets = append(tgroups[0].Targets, fmt.Sprintf("%s:%d", node.ID, config.NodePort))
 	}
 	tgroups[0].Labels["role"] = "kubernetes_nodes"
 	// step: marshall the config
