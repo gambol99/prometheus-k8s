@@ -11,9 +11,15 @@ VERSION=$(shell awk '/const version/ { print $$4 }' version.go | sed 's/"//g')
 
 .PHONY: test
 
+default: build
+
 build:
 	mkdir -p bin
 	go build -o bin/prometheus-k8s
+
+static:
+	mkdir -p bin
+	CGO_ENABLED=0 GOOS=linux go build -a -tags netgo -ldflags '-w' -o bin/prometheus-k8s
 
 docker: build
 	sudo docker build -t ${AUTHOR}/${NAME} .
