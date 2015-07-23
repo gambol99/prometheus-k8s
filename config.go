@@ -61,7 +61,7 @@ var (
 func init() {
 	flag.StringVar(&config.Host, "api", "127.0.0.1", "the host / ip address the kubectl proxy is running")
 	flag.StringVar(&config.ConfigTemplate, "template", "", "the template file used to generate the prometheus configuration")
-	flag.StringVar(&config.NodesConfigFilename, "node-file", "node.yml", "the filename of the nodes yaml file")
+	flag.StringVar(&config.NodesConfigFilename, "node-file", "nodes.yml", "the filename of the nodes yaml file")
 	flag.StringVar(&config.PodsConfigFilename, "pod-file", "pods.yml", "the filename of of the pods yaml")
 	flag.StringVar(&config.APIVersion, "api-version", "v1", "the protocol to use when connecting to the api")
 	flag.StringVar(&config.APIProtocol, "api-protocol", "http", "the kubernetes api version to use")

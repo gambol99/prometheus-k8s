@@ -8,6 +8,8 @@
 bin/
 *.iml
 *.swp
+nodes.yml
+pods.yml
 
 *.o
 *.a

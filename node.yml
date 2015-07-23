@@ -1,6 +1,0 @@
-- targets:
-  - 10.250.1.201
-  - 10.250.1.202
-  - 10.250.1.203
-  labels:
-    role: kubernetes_nodes
