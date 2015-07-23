@@ -7,7 +7,9 @@
 FROM gliderlabs/alpine:3.1
 MAINTAINER Rohith <gambol99@gmail.com>
 
-ADD bin/prometheus-k8s /bin/prometheus-k8s
-RUN chmod +x /bin/prometheus-k8s
+ADD https://drone.io/github.com/gambol99/prometheus-k8s/files/bin/prometheus-k8s.gz /bin/prometheus-k8s.gz
+RUN md5sum /bin/prometheus-k8s.gz && \
+    gunzip /bin/prometheus-k8s.gz && \
+    chmod +x /bin/prometheus-k8s
 
 ENTRYPOINT [ "/bin/prometheus-k8s" ]
