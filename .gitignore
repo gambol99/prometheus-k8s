@@ -1,7 +1,22 @@
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
+#
+#   Author: Rohith
+#   Date: 2015-07-20 19:41:37 +0100 (Mon, 20 Jul 2015)
+#
+#  vim:ts=2:sw=2:et
+#
+
+bin/
+*.iml
+*.swp
+
 *.o
 *.a
 *.so
+embassy
+release/
+stage/embassy
+embassy.iml
+.idea/
 
 # Folders
 _obj
@@ -21,4 +36,3 @@ _testmain.go
 
 *.exe
 *.test
-*.prof
