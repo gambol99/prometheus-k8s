@@ -41,3 +41,12 @@ func decode(input []byte, output interface{}) error {
 	}
 	return nil
 }
+
+// decodeMetrics ... decodes the annotated metrics back into the correct structure
+func decodeMetrics(cfg string) ([]*Metrics, error) {
+	var metrics []*Metrics
+	if err := decode([]byte(cfg), &metrics); err != nil {
+		return nil, fmt.Errorf("invalid metric config, error: %s", err)
+	}
+	return metrics, nil
+}

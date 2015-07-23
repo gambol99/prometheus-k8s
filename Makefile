@@ -25,7 +25,7 @@ docker: build
 	sudo docker build -t ${AUTHOR}/${NAME} .
 
 test: build
-	bin/prometheus-k8s -api=10.250.1.201 -port=8080 -logtostderr=true -dry-run
+	bin/prometheus-k8s -api=10.250.1.201 -port=8080 -logtostderr=true -v=3 -dry-run
 
 clean:
 	rm -rf ./bin

@@ -1,0 +1,39 @@
+#
+#   Author: Rohith
+#   Date: 2015-07-20 16:46:40 +0100 (Mon, 20 Jul 2015)
+#
+#  vim:ts=2:sw=2:et
+#
+---
+#
+# An exporter for collectd metrics
+#
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: collectd-exporter
+spec:
+  replicas: 3
+  selector:
+    name: collectd-exporter
+  template:
+    metadata:
+      labels:
+        name: collectd-exporter
+      annotations:
+        metrics: |
+          - name: collectd-exporter
+            port: 9103
+    spec:
+      containers:
+      - name: apache
+        image: prom/collectd-exporter
+        ports:
+        - containerPort: 9001
+        - containerPort: 25826
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 9103
+          initialDelaySeconds: 120
+          timeoutSeconds: 10

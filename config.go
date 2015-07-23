@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/url"
 )
 
 //
@@ -89,7 +90,7 @@ func parseConfig() error {
 	// step: validate we have everything we need to proceed
 	location := fmt.Sprintf("%s://%s:%d", config.APIProtocol, config.Host, config.Port)
 	// check: ensure the location is valid
-	if err := validateURL(location); err != nil {
+	if _, err := url.Parse(location); err != nil {
 		return fmt.Errorf("invalid URL specified, please check the url and port, error: %s", err)
 	}
 	return nil

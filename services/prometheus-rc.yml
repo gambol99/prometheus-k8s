@@ -1,6 +1,6 @@
 #
 #   Author: Rohith
-#   Date: 2015-07-20 16:46:40 +0100 (Mon, 20 Jul 2015)
+#   Date: 2015-07-20 16:46:35 +0100 (Mon, 20 Jul 2015)
 #
 #  vim:ts=2:sw=2:et
 #
@@ -8,32 +8,43 @@
 apiVersion: v1
 kind: ReplicationController
 metadata:
-  name: test-service
+  name: prometheus
 spec:
   replicas: 1
   selector:
-    name: test-service
+    name: prometheus
   template:
     metadata:
       labels:
-        name: test-service
-      anontations:
-        metrics: |
-        - name: collectd
-          port: 8001
-        - name: statsd
-          port: 8002
+        name: prometheus
     spec:
       containers:
-      - name: test-service
-        image: fedora/apache
+      - name: prometheus-k8s
+        image: gambol99/prometheus-k8s
+        args:
+          - -config=/etc/prometheus/targets.d
+          - -api-protocol=https
+          - -logtostderr=true
+          - -v=3
+        volumeMounts:
+        - name: targets
+          mountPath: /etc/prometheus/targets.d
+      - name: prometheus
+        image: gambol99/prometheus
         ports:
-        - containerPort: 80
-      - name: collectd-exporter
-        image: prom/collectd-exporter
-        ports:
-        - containerPort: 8001
-      - name: statsd-exporter
-        image: prom/statsd-exporter
-        ports:
-        - containerPort: 8002
+        - containerPort: 9090
+        args:
+          - -config.file=/etc/prometheus/prometheus.yml
+          - -storage.local.path=/prometheus
+          - -web.console.libraries=/etc/prometheus/console_libraries
+          - -web.console.templates=/etc/prometheus/console
+          - -storage.remote.influxdb-url=10.101.128.194:8086
+          - -storage.remote.influxdb.database=prometheus
+        volumeMounts:
+        - name: targets
+          mountPath: /etc/prometheus/targets.d
+      imagePullPolicy: Always
+      volumes:
+      - name: targets
+        source:
+          emptyDir: {}

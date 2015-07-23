@@ -16,13 +16,7 @@ limitations under the License.
 
 package main
 
-// Targets ... the structure of the prometheus file discovery targets
-type Targets struct {
-	// the array of hosts within this target
-	Targets []string `yaml:"targets",json:"targets"`
-	// the labels associated to these targets
-	Labels map[string]string `yaml:"labels",json:"labels"`
-}
+
 
 func NewTarget() *Targets {
 	return &Targets{

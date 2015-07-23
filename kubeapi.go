@@ -28,7 +28,7 @@ import (
 )
 
 // Implements the KubeAPI service interface
-type watcherImpl struct {
+type kubeAPIImpl struct {
 	// the kubernetes api client
 	client *client.Client
 }
@@ -36,10 +36,10 @@ type watcherImpl struct {
 // NewKubeAPI ... creates a new watch service for kubernetes
 func NewKubeAPI() (KubeAPI, error) {
 	glog.Infof("Creating a new Kube API service, api: %s", getKubernetesURL())
-	service := new(watcherImpl)
+	service := new(kubeAPIImpl)
 	// step: create the kubernetes client config
-	if kube, err := service.createClient(); err != nil {
-		glog.V(5).Infof("Failed to create a new kubernete client, error: %s", err)
+	if kube, err := service.createKubeAPIClient(); err != nil {
+		glog.Errorf("Failed to create a new kubernete client, error: %s", err)
 		return nil, err
 	} else {
 		// step: fill in the service
@@ -49,7 +49,7 @@ func NewKubeAPI() (KubeAPI, error) {
 }
 
 // Nodes ... retrieve a list of nodes from Kuberntes, normalize them and give me the list
-func (r watcherImpl) Nodes() ([]*Node, error) {
+func (r kubeAPIImpl) Nodes() ([]*Node, error) {
 	glog.V(4).Infof("Retrieving a list of the nodes from kubernetes")
 	nodes, err := r.client.Nodes().List(labels.Everything(), fields.Everything())
 	if err != nil {
@@ -71,8 +71,10 @@ func (r watcherImpl) Nodes() ([]*Node, error) {
 }
 
 // Pods ... retrieve a list of running within the namespace
-func (r watcherImpl) Pods() ([]*Pod, error) {
+func (r kubeAPIImpl) Pods() ([]*Pod, error) {
 	glog.V(4).Infof("Retrieving a list of the running pods")
+
+	// step: get a list of the pods and find the current revision
 	var list []*Pod
 	pods, err := r.client.Pods(api.NamespaceAll).List(labels.Everything(), fields.Everything())
 	if err != nil {
@@ -103,7 +105,7 @@ func (r watcherImpl) Pods() ([]*Pod, error) {
 //
 // Watch ... is the main entry-point for the service, we listen out for changes in the
 // nodes, pods and the refresh timer
-func (r *watcherImpl) Watch(updates UpdateEvent) (ShutdownChannel, error) {
+func (r *kubeAPIImpl) Watch(updates UpdateEvent) (ShutdownChannel, error) {
 	var err error
 	var nodeCh, podsCh watch.Interface
 
@@ -149,7 +151,7 @@ func (r *watcherImpl) Watch(updates UpdateEvent) (ShutdownChannel, error) {
 }
 
 // createPodsWatch: creates a watcher channel for changes on the pods within the configured namespace
-func (r watcherImpl) createPodsWatch() (watch.Interface, error) {
+func (r kubeAPIImpl) createPodsWatch() (watch.Interface, error) {
 	glog.V(4).Infof("Creating a watcher for the kubernetes pods")
 	// step: lets retrieve a revision from which to work from
 	list, err := r.client.Pods(api.NamespaceAll).List(labels.Everything(), fields.Everything())
@@ -165,7 +167,7 @@ func (r watcherImpl) createPodsWatch() (watch.Interface, error) {
 }
 
 // createNodesWatch: create a nodes update interface used to watch changes in nodes
-func (r watcherImpl) createNodesWatch() (watch.Interface, error) {
+func (r kubeAPIImpl) createNodesWatch() (watch.Interface, error) {
 	glog.V(4).Infof("Creating a watcher for the kubernetes nodes")
 	// step: lets retrieve a revision from which to work from
 	list, err := r.client.Nodes().List(labels.Everything(), fields.Everything())
@@ -180,16 +182,18 @@ func (r watcherImpl) createNodesWatch() (watch.Interface, error) {
 }
 
 // createClient: creates a new client to speak to the kubernetes api service
-func (r *watcherImpl) createClient() (*client.Client, error) {
+func (r *kubeAPIImpl) createKubeAPIClient() (*client.Client, error) {
 	// step: create the configuration
 	kubecfg := client.Config{
 		Host:     getKubernetesURL(),
 		Insecure: config.HttpInsecure,
 		Version:  config.APIVersion,
 	}
+	// check: are we using a user token to authenticate?
 	if config.TokenFile != "" {
 		kubecfg.BearerToken = config.TokenFile
 	}
+	// check: are we using a cert to authenticate
 	if config.CaCertFile != "" {
 		kubecfg.Insecure = false
 		kubecfg.TLSClientConfig = client.TLSClientConfig{
@@ -205,7 +209,7 @@ func (r *watcherImpl) createClient() (*client.Client, error) {
 	return kube, nil
 }
 
-// Generate the url used to communicate with the kubernetes api service
+// getKubernetesURL: generate the url used to communicate with the kubernetes api service
 func getKubernetesURL() string {
 	return fmt.Sprintf("%s://%s:%d", config.APIProtocol, config.Host, config.Port)
 }

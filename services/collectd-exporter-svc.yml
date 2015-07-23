@@ -1,0 +1,20 @@
+#
+#   Author: Rohith
+#   Date: 2015-07-23 14:53:45 +0100 (Thu, 23 Jul 2015)
+#
+#  vim:ts=2:sw=2:et
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: collectd-exporter
+  name: collectd-exporter
+spec:
+  ports:
+    - name: collectd-binary
+      port: 25826
+      targetPort: 25826
+  selector:
+    name: collectd-exporter

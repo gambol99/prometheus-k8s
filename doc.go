@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 package main
+import "fmt"
 
 //
 // Event ... the update event itself
@@ -40,4 +41,59 @@ type KubeAPI interface {
 	Pods() ([]*Pod, error)
 	// watch for changes in nodes and pods and update
 	Watch(UpdateEvent) (ShutdownChannel, error)
+}
+
+// Pod ... a normalize form of running pod
+type Pod struct {
+	// the name / id of the pod
+	ID string
+	// the label name
+	Name string
+	// the namespace of the pod
+	Namespace string
+	// the labels associated to the pod
+	Labels map[string]string
+	// the annotations associated to the pod
+	Annotations map[string]string
+	// the ip address of the pod
+	Address string
+}
+
+// Node ... the definition of the kubernetes node
+type Node struct {
+	// the name / ID of the node
+	ID string
+	// the labels associated to the node
+	Labels map[string]string
+}
+
+// Targets ... the structure of the prometheus file discovery targets
+type Targets struct {
+	// the array of hosts within this target
+	Targets []string `yaml:"targets",json:"targets"`
+	// the labels associated to these targets
+	Labels map[string]string `yaml:"labels",json:"labels"`
+}
+
+// Metrics ... is the structure used to produce details about the metric endpoints
+// being exported by a pod
+type Metrics struct {
+	// the name of the metric (optional)
+	Name string `yaml:"name,omitempty", json:"name,omitempty"`
+	// the port of the metric
+	Port int `yaml:"port", json:"port"`
+	// the endpoint (optional)
+	Endpoint string `yaml:"endpoint,omitempty", json:"endpoint,omitempty"`
+}
+
+
+func (r Pod) String() string {
+	return fmt.Sprintf(`
+		ID: %s
+		Name: %s
+		Namespace: %s
+		Labels: %s
+		Annotations: %s
+		Address: %s
+	`, r.ID, r.Name, r.Namespace, r.Labels, r.Annotations, r.Address)
 }
