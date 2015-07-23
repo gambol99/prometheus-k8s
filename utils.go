@@ -18,9 +18,29 @@ package main
 
 import (
 	"net/url"
+	"strconv"
+	"os"
 )
 
 func validateURL(location string) (err error) {
 	_, err = url.Parse(location)
 	return
+}
+
+func getEnvString(key, value string) string {
+	if os.Getenv(key) != "" {
+		return os.Getenv(key)
+	}
+	return value
+}
+
+func getEnvInt(key string, default_value int) int {
+	if os.Getenv(key) != "" {
+		value, err := strconv.Atoi(os.Getenv(key))
+		if err != nil {
+			return default_value
+		}
+		return value
+	}
+	return default_value
 }

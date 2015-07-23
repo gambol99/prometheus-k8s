@@ -36,8 +36,6 @@ type Config struct {
 	CaCertFile string
 	// the metrics annotation used
 	MetricAnnotation string
-	// the template used to generate the configuration
-	ConfigTemplate string
 	// the filename of the nodes yaml
 	NodesConfigFilename string
 	// the filename of the pods yaml
@@ -65,8 +63,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&config.Host, "api", "127.0.0.1", "the host / ip address the kubectl proxy is running")
-	flag.StringVar(&config.ConfigTemplate, "template", "", "the template file used to generate the prometheus configuration")
+	flag.StringVar(&config.Host, "api", getEnvString("KUBERNETES_SERVICE_HOST", "127.0.0.1"), "the host / ip address the kubectl proxy is running")
 	flag.StringVar(&config.NodesConfigFilename, "node-file", "nodes.yml", "the filename of the nodes yaml file")
 	flag.StringVar(&config.PodsConfigFilename, "pod-file", "pods.yml", "the filename of of the pods yaml")
 	flag.StringVar(&config.APIVersion, "api-version", "v1", "the protocol to use when connecting to the api")
@@ -76,7 +73,7 @@ func init() {
 	flag.StringVar(&config.TokenFile, "bearer-token-file", "", "The file containing the bearer token.")
 	flag.StringVar(&config.CaCertFile, "ca-cert-file", "", "The file containing the CA certificate.")
 	flag.BoolVar(&config.HttpInsecure, "insecure", true, "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")
-	flag.IntVar(&config.Port, "port", 8001, "the port the api proxy is running on")
+	flag.IntVar(&config.Port, "port", getEnvInt("KUBERNETES_SERVICE_PORT", 8001), "the port the api proxy is running on")
 	flag.IntVar(&config.RefreshInterval, "interval", 300, "the refresh interval in seconds that we perform a forced refresh")
 	flag.BoolVar(&config.WithNodes, "nodes", true, "generate the metric endpoints for all kubernetes nodes in the cluster")
 	flag.BoolVar(&config.WithPods, "pods", true, "generate the metric endpoints for pods which container prometheus endpoints")
