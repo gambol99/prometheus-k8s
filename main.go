@@ -53,6 +53,8 @@ func main() {
 	signalChannel := make(chan os.Signal)
 	signal.Notify(signalChannel, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
+	glog.Infof("Starting the Prometheus Watcher Service, version: %s", VERSION)
+
 	// step: we create a channel to receive updates from the api
 	serviceUpdatesCh := make(UpdateEvent, 10)
 	// step: we start watching out for events from the api
@@ -153,7 +155,8 @@ func generateNodesConfiguration() ([]byte, error) {
 
 // renderPods: write the pod config to disk
 func generatePodsConfiguration() ([]byte, error) {
-	glog.V(4).Infof("Rendering the pods to configuration")
+	glog.V(4).Infof("Generating the pod services configuration")
+
 	// step: get the current listing of pods
 	pods, err := kubeapi.Pods()
 	if err != nil {
@@ -170,7 +173,7 @@ func generatePodsConfiguration() ([]byte, error) {
 			// check: does the pod have a metrics annotation?
 			if _, found := pod.Annotations[METRICS_ANNOTATION]; found {
 				// check: decode the metrics
-				metrics, err := DecodeMetrics(pod.Annotations[METRICS_ANNOTATION])
+				metrics, err := decodeMetrics(pod.Annotations[METRICS_ANNOTATION])
 				if err != nil {
 					glog.Errorf("Skipping pod: '%s', name: '%s' as the metrics config is invalid, error: %s",
 						pod.ID, pod.Name, err)
@@ -192,14 +195,20 @@ func generatePodsConfiguration() ([]byte, error) {
 	// the target groups per service name
 	for service_name, metrics := range service_groups {
 		target := NewTarget()
-		target.Labels["service"] = service_name
+		target.Labels["pod"] = service_name
 
 		for _, pod := range pods {
 			if pod.Name == service_name {
+				// step: copy in the rest of the pod labels
+				for k, v := range pod.Labels {
+					if k == "pod" {
+						continue
+					}
+					target.Labels[k] = v
+				}
 				// step: we produce a endpoint for each metrics listed
 				for _, metric := range metrics {
-					target.Targets = append(target.Targets, fmt.Sprintf("%s:%d",
-						pod.Address, metric.Port))
+					target.Targets = append(target.Targets, fmt.Sprintf("%s:%d", pod.Address, metric.Port))
 				}
 			}
 		}
@@ -208,11 +217,10 @@ func generatePodsConfiguration() ([]byte, error) {
 	}
 
 	// step: marshall the config into format
-	formate, err := encode(groups)
+	format, err := encode(groups)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to marshall the target into format, error: %s", err)
 	}
-	// step: print the config
-	return formate, nil
+	return format, nil
 }
 

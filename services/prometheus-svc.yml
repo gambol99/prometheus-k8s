@@ -1,0 +1,27 @@
+#
+#   Author: Rohith
+#   Date: 2015-07-20 16:46:40 +0100 (Mon, 20 Jul 2015)
+#
+#  vim:ts=2:sw=2:et
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: prometheus
+  name: prometheus
+  annotations:
+    loadbalancer: |
+      9090:
+        type: http
+        port: 80
+        vhost: prometheus
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+  selector:
+    name: prometheus

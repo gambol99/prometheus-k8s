@@ -17,7 +17,5 @@ limitations under the License.
 package main
 
 const (
-	author  = "Rohith Jayawardene"
-	email   = "gambol99@gmail.com"
-	version = "0.0.1"
+	VERSION = "0.0.1"
 )

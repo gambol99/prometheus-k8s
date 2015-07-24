@@ -17,15 +17,9 @@ limitations under the License.
 package main
 
 import (
-	"net/url"
-	"strconv"
 	"os"
+	"strconv"
 )
-
-func validateURL(location string) (err error) {
-	_, err = url.Parse(location)
-	return
-}
 
 func getEnvString(key, value string) string {
 	if os.Getenv(key) != "" {

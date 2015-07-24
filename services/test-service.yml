@@ -1,0 +1,35 @@
+#
+#   Author: Rohith
+#   Date: 2015-07-23 14:53:45 +0100 (Thu, 23 Jul 2015)
+#
+#  vim:ts=2:sw=2:et
+#
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: apache
+spec:
+  replicas: 3
+  selector:
+    name: apache
+  template:
+    metadata:
+      labels:
+        name: apache
+      annotations:
+        metrics: |
+          - name: apache
+            port: 80
+    spec:
+      containers:
+      - name: apache
+        image: gambol99/apache-php:latest
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 300
+          timeoutSeconds: 3
