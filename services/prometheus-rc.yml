@@ -25,7 +25,8 @@ spec:
           - -config=/etc/prometheus/targets.d
           - -api-protocol=https
           - -logtostderr=true
-          - -v=3
+          - -v=3 
+          - -nodes=false
         volumeMounts:
         - name: targets
           mountPath: /etc/prometheus/targets.d
@@ -38,8 +39,6 @@ spec:
           - -storage.local.path=/prometheus
           - -web.console.libraries=/etc/prometheus/console_libraries
           - -web.console.templates=/etc/prometheus/console
-          - -storage.remote.influxdb-url=10.101.128.194:8086
-          - -storage.remote.influxdb.database=prometheus
         volumeMounts:
         - name: targets
           mountPath: /etc/prometheus/targets.d

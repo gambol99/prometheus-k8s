@@ -101,7 +101,7 @@ func generateConfiguration() error {
 		}
 		writeConfiguration(content, fmt.Sprintf("%s/%s", config.ConfigDirectory, config.NodesConfigFilename))
 	}
-	if config.WithNodes {
+	if config.WithPods {
 		content, err := generatePodsConfiguration()
 		if err != nil {
 			glog.Errorf("Unable to retrieve the list of pods: error: %s", err)
