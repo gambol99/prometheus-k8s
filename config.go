@@ -33,6 +33,8 @@ type Config struct {
 	Namespace string
 	// the kubernetes token file if any
 	TokenFile string
+	// the kubernetes token
+	Token  string
 	// the cert used to verify to kubernetes
 	CaCertFile string
 	// the metrics annotation used
@@ -73,13 +75,14 @@ func init() {
 	flag.StringVar(&config.APIProtocol, "api-protocol", "http", "the kubernetes api version to use")
 	flag.StringVar(&config.ConfigDirectory, "config", ".", "the directory save the genrated files into")
 	flag.StringVar(&config.MetricAnnotation, "metrics", METRICS_ANNOTATION, "the tag used in the pods annotations")
-	flag.StringVar(&config.TokenFile, "bearer-token-file", "", "The file containing the bearer token.")
-	flag.StringVar(&config.CaCertFile, "ca-cert-file", "", "The file containing the CA certificate.")
-	flag.BoolVar(&config.HttpInsecure, "insecure", true, "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")
+	flag.StringVar(&config.TokenFile, "bearer-token-file", "", "The file containing the bearer token")
+	flag.StringVar(&config.Token, "bearer-token", "", "a kubernetes token to authenticate to the api")
+	flag.StringVar(&config.CaCertFile, "ca-cert-file", "", "The file containing the CA certificate")
+	flag.BoolVar(&config.HttpInsecure, "insecure", true, "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure")
 	flag.IntVar(&config.Port, "port", getEnvInt("KUBERNETES_SERVICE_PORT", 8001), "the port the api proxy is running on")
 	flag.IntVar(&config.NodePort, "node-port", 4194, "if with-nodes enabled, the port specified is used")
 	flag.IntVar(&config.RefreshInterval, "interval", 300, "the refresh interval in seconds that we perform a forced refresh")
-	flag.BoolVar(&config.WithNodes, "nodes", true, "generate the metric endpoints for all kubernetes nodes in the cluster")
+	flag.BoolVar(&config.WithNodes, "nodes", false, "generate the metric endpoints for all kubernetes nodes in the cluster")
 	flag.BoolVar(&config.WithPods, "pods", true, "generate the metric endpoints for pods which container prometheus endpoints")
 	flag.BoolVar(&config.DryRun, "dry-run", false, "perform a dry run, display output to screen only")
 }

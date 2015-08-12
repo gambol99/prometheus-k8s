@@ -25,6 +25,8 @@ import (
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/labels"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/watch"
 	"github.com/golang/glog"
+	"os"
+	"io/ioutil"
 )
 
 // Implements the KubeAPI service interface
@@ -189,9 +191,22 @@ func (r *kubeAPIImpl) createKubeAPIClient() (*client.Client, error) {
 		Insecure: config.HttpInsecure,
 		Version:  config.APIVersion,
 	}
-	// check: are we using a user token to authenticate?
+
+	// check: ensure the token file exists
 	if config.TokenFile != "" {
-		kubecfg.BearerToken = config.TokenFile
+		if _, err := os.Stat(config.TokenFile); os.IsNotExist(err) {
+			return nil, fmt.Errorf("the token file: %s does not exist", config.TokenFile)
+		}
+		content, err := ioutil.ReadFile(config.TokenFile)
+		if err != nil {
+			return nil, fmt.Errorf("unable to read the token file: %s, error: %s", config.TokenFile, err)
+		}
+		config.Token = string(content)
+	}
+
+	// check: are we using a user token to authenticate?
+	if config.Token != "" {
+		kubecfg.BearerToken = config.Token
 	}
 	// check: are we using a cert to authenticate
 	if config.CaCertFile != "" {

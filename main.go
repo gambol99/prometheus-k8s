@@ -91,9 +91,10 @@ func main() {
 
 // generateConfiguration: render the configuration to file/s
 func generateConfiguration() error {
-	glog.Infof("Updating the configuration of the prometheus endpoints / targets")
+	glog.Infof("Generating the configuration of the prometheus nodes and services")
 	// step: are we generating the nodes?
 	if config.WithNodes {
+		glog.Infof("Generating the endpoints for the nodes")
 		content, err := generateNodesConfiguration()
 		if err != nil {
 			glog.Errorf("Unable to retrieve the list of nodes: error: %s", err)
@@ -102,6 +103,7 @@ func generateConfiguration() error {
 		writeConfiguration(content, fmt.Sprintf("%s/%s", config.ConfigDirectory, config.NodesConfigFilename))
 	}
 	if config.WithPods {
+		glog.Infof("Generating the endpoints for the pods")
 		content, err := generatePodsConfiguration()
 		if err != nil {
 			glog.Errorf("Unable to retrieve the list of pods: error: %s", err)
