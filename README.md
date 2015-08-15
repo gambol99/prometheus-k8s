@@ -3,15 +3,18 @@
 -----
 Is a utility service used to listen to extract and inject config for kubernetes pods that are exporting prometheus metrics endpoints. It works by simply annotating the pod definition with the metrics tag. Taking the example below, lets assume you have some webapp with an nginx frontend, both of which are exporting their metrics (nginx via /status and collectd exporter), you simply add the metrics yaml as annotation, match up the ports and indicate which ports are export promethues endpoints. The service watches out for changes in pods, extracts the details and templates our the config for promethues to pick up on file discovery. In this example pod, promethues runs in one container, prometheus-k2s in another the files are shared with an emptyDir volume (check the repo for details) 
 
-    	  - job_name: 'nodes'
-          file_sd_configs:
-          - names: [ '/etc/prometheus/targets.d/nodes.yml' ]
-        - job_name: 'pods'
-          file_sd_configs:
-          - names: [ '/etc/prometheus/targets.d/pods.yml' ]
+```YAML
+- job_name: 'nodes'
+  file_sd_configs:
+  - names: [ '/etc/prometheus/targets.d/nodes.yml' ]
+- job_name: 'pods'
+  file_sd_configs:
+  - names: [ '/etc/prometheus/targets.d/pods.yml' ]
+```
 
 The nodes are fairly easier to add, simply watching the **/api/v1/nodes** we can get a list of nodes. The pods however require additional information. Say for example you have a pod, a web app exporting some metrics, a nginx instance with
 
+```YAML
     apiVersion: v1
     kind: ReplicationController
     metadata:
@@ -41,11 +44,12 @@ The nodes are fairly easier to add, simply watching the **/api/v1/nodes** we can
               ports:
               - containerPort: 8081
             - name: collectd
+```            
 
 ### **Example Pod**
 -----------------------
 
-#
+```YAML
     ---
     apiVersion: v1
     kind: ReplicationController
@@ -95,4 +99,4 @@ The nodes are fairly easier to add, simply watching the **/api/v1/nodes** we can
           - name: tokens
             hostPath:
               path: /run/kube-kubelet
-
+```
