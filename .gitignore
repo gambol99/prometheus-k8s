@@ -10,6 +10,7 @@ bin/
 *.swp
 nodes.yml
 pods.yml
+/tests/api/v1
 
 *.o
 *.a

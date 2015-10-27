@@ -15,24 +15,25 @@ limitations under the License.
 */
 
 package main
+
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v2"
 	"github.com/golang/glog"
+	"gopkg.in/yaml.v2"
 )
 
-// encode ... convert / marshall the data structure into the specified format
+// encode converts / marshall the data structure into the specified format
 func encode(data interface{}) (output []byte, err error) {
 	output, err = yaml.Marshal(data)
 	if err != nil {
 		glog.Errorf("Failed to marshall the structure to yaml, %s, error: %s", data, err)
-		return nil, fmt.Errorf("marshalling failure, data: %V, error: %s", data, err)
+		return nil, fmt.Errorf("marshalling failure, data: %v, error: %s", data, err)
 	}
 	return
 }
 
-// decode ... decodes the string into a actual structure
+// decode parses and decodes the string into a actual structure
 func decode(input []byte, output interface{}) error {
 	err := yaml.Unmarshal(input, output)
 	if err != nil {
@@ -42,7 +43,7 @@ func decode(input []byte, output interface{}) error {
 	return nil
 }
 
-// decodeMetrics ... decodes the annotated metrics back into the correct structure
+// decodeMetrics decodes the annotated metrics back into the correct structure
 func decodeMetrics(cfg string) ([]*Metrics, error) {
 	var metrics []*Metrics
 	if err := decode([]byte(cfg), &metrics); err != nil {

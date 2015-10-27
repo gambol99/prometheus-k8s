@@ -20,6 +20,8 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
+
+	"k8s.io/kubernetes/pkg/api"
 )
 
 //
@@ -30,11 +32,11 @@ type Config struct {
 	// the port the api proxy is running
 	Port int
 	// the kubernetes namespace to listen in
-	Namespace string
+	Namespaces string
 	// the kubernetes token file if any
 	TokenFile string
 	// the kubernetes token
-	Token  string
+	Token string
 	// the cert used to verify to kubernetes
 	CaCertFile string
 	// the metrics annotation used
@@ -53,14 +55,14 @@ type Config struct {
 	APIProtocol string
 	// the node port
 	NodePort int
-	// toggle to indicate if we shoud add all the kubernetes nodes as targets
+	// toggle to indicate if we should add all the kubernetes nodes as targets
 	WithNodes bool
 	// a toggle to produce the endpoints for pods
 	WithPods bool
 	// a dry run - i.e. only display to screen
 	DryRun bool
 	// Insure https
-	HttpInsecure bool
+	HTTPInsecure bool
 }
 
 var (
@@ -74,11 +76,12 @@ func init() {
 	flag.StringVar(&config.APIVersion, "api-version", "v1", "the protocol to use when connecting to the api")
 	flag.StringVar(&config.APIProtocol, "api-protocol", "http", "the kubernetes api version to use")
 	flag.StringVar(&config.ConfigDirectory, "config", ".", "the directory save the genrated files into")
-	flag.StringVar(&config.MetricAnnotation, "metrics", METRICS_ANNOTATION, "the tag used in the pods annotations")
+	flag.StringVar(&config.MetricAnnotation, "metrics", "metrics", "the tag used in the pods annotations")
 	flag.StringVar(&config.TokenFile, "bearer-token-file", "", "The file containing the bearer token")
 	flag.StringVar(&config.Token, "bearer-token", "", "a kubernetes token to authenticate to the api")
 	flag.StringVar(&config.CaCertFile, "ca-cert-file", "", "The file containing the CA certificate")
-	flag.BoolVar(&config.HttpInsecure, "insecure", true, "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure")
+	flag.StringVar(&config.Namespaces, "namespace", getEnvString("KUBERNETES_NAMESPACE", api.NamespaceAll), "the kubernetes namespace to watched, defaults to all")
+	flag.BoolVar(&config.HTTPInsecure, "insecure", true, "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure")
 	flag.IntVar(&config.Port, "port", getEnvInt("KUBERNETES_SERVICE_PORT", 8001), "the port the api proxy is running on")
 	flag.IntVar(&config.NodePort, "node-port", 4194, "if with-nodes enabled, the port specified is used")
 	flag.IntVar(&config.RefreshInterval, "interval", 300, "the refresh interval in seconds that we perform a forced refresh")
