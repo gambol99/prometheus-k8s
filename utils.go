@@ -17,24 +17,50 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
 
+// getEnvString get the value from the environment or use the default
 func getEnvString(key, value string) string {
 	if os.Getenv(key) != "" {
 		return os.Getenv(key)
 	}
+
 	return value
 }
 
-func getEnvInt(key string, default_value int) int {
+// getEnvInt retrieve the value from the environment or use the default
+func getEnvInt(key string, defaultValue int) int {
 	if os.Getenv(key) != "" {
 		value, err := strconv.Atoi(os.Getenv(key))
 		if err != nil {
-			return default_value
+			return defaultValue
 		}
 		return value
 	}
-	return default_value
+
+	return defaultValue
+}
+
+// writeConfigFile write the contents to stdout of a file
+func writeConfigFile(content []byte, directory, filename string, dryRun bool) (err error) {
+	var file *os.File
+
+	if dryRun {
+		file = os.Stdout
+	}
+	if !dryRun {
+		file, err = os.Open(fmt.Sprintf("%s/%s", directory, filename))
+		if err != nil {
+			return
+		}
+	}
+
+	if _, err := file.Write(content); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -16,9 +16,7 @@ limitations under the License.
 
 package main
 
-
-
-func NewTarget() *Targets {
+func newTarget() *Targets {
 	return &Targets{
 		Targets: make([]string, 0),
 		Labels:  make(map[string]string, 0),

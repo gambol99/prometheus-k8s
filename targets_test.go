@@ -17,41 +17,16 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-const (
-	nodeEvent = 1
-	podEvent  = 2
-)
-
-func (r Event) String() string {
-	return fmt.Sprintf("type: %s, event: %v", r.getEventType(), r.Event)
-}
-
-func (r Event) getEventType() string {
-	switch r.Type {
-	case nodeEvent:
-		return "node"
-	default:
-		return "pod"
-	}
-}
-
-// newEvent create a new event for us
-func newEvent(eventType int, event interface{}) *Event {
-	return &Event{
-		Type:  eventType,
-		Event: event,
-	}
-}
-
-func (r *Event) isNodeEvent() *Event {
-	r.Type = nodeEvent
-	return r
-}
-
-func (r *Event) isPodEvent() *Event {
-	r.Type = podEvent
-	return r
+func TestNewTarget(t *testing.T) {
+	targets := newTarget()
+	assert.NotNil(t, targets)
+	assert.NotNil(t, targets.Labels)
+	assert.NotNil(t, targets.Targets)
+	assert.Empty(t, targets.Labels)
+	assert.Empty(t, targets.Targets)
 }

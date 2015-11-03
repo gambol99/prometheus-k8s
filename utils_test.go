@@ -17,41 +17,22 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-const (
-	nodeEvent = 1
-	podEvent  = 2
-)
-
-func (r Event) String() string {
-	return fmt.Sprintf("type: %s, event: %v", r.getEventType(), r.Event)
+func TestGetEnvString(t *testing.T) {
+	assert.NotEmpty(t, getEnvString("USER", ""))
+	assert.Equal(t, getEnvString("NOTHING", "TEST"), "TEST")
 }
 
-func (r Event) getEventType() string {
-	switch r.Type {
-	case nodeEvent:
-		return "node"
-	default:
-		return "pod"
-	}
-}
-
-// newEvent create a new event for us
-func newEvent(eventType int, event interface{}) *Event {
-	return &Event{
-		Type:  eventType,
-		Event: event,
-	}
-}
-
-func (r *Event) isNodeEvent() *Event {
-	r.Type = nodeEvent
-	return r
-}
-
-func (r *Event) isPodEvent() *Event {
-	r.Type = podEvent
-	return r
+func TestGetEnvInt(t *testing.T) {
+	value := getEnvInt("TEST_NUMBER", 4)
+	assert.Equal(t, value, 4)
+	os.Setenv("TEST_NUMBER", "10")
+	value = getEnvInt("TEST_NUMBER", 4)
+	assert.Equal(t, value, 10)
+	os.Setenv("TEST_NUMBER", "10")
 }

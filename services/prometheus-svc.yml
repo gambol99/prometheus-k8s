@@ -11,16 +11,9 @@ metadata:
   labels:
     name: prometheus
   name: prometheus
-  annotations:
-    loadbalancer: |
-      9090:
-        type: http
-        port: 80
-        vhost: prometheus
 spec:
-  type: NodePort
   ports:
-    - name: http
+    - name: https
       port: 9090
       targetPort: 9090
   selector:
