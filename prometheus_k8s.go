@@ -136,7 +136,7 @@ func (r *PrometheusK8S) generatePodsConfiguration() ([]byte, error) {
 	namespaces := strings.Split(config.Namespaces, ",")
 
 	for _, namespace := range namespaces {
-		// step: check the namespace exists and if not, just skipp
+		// step: check the namespace exists and if not, just skip
 		found, err := r.client.NamespaceExists(namespace)
 		if err != nil {
 			glog.Errorf("unable to determine if the namespace: %s exists, error: %s", namespace, err)

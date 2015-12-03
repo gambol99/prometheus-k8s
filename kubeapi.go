@@ -23,7 +23,8 @@ import (
 
 	"github.com/golang/glog"
 	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/client/unversioned"
+	"k8s.io/kubernetes/pkg/api/unversioned"
+	capi "k8s.io/kubernetes/pkg/client/unversioned"
 	"k8s.io/kubernetes/pkg/fields"
 	"k8s.io/kubernetes/pkg/labels"
 	"k8s.io/kubernetes/pkg/watch"
@@ -32,7 +33,7 @@ import (
 // Implements the KubeAPI service interface
 type kubeAPIImpl struct {
 	// the kubernetes api client
-	client *unversioned.Client
+	client *capi.Client
 }
 
 // NewKubeAPI ... creates a new watch service for kubernetes
@@ -176,15 +177,16 @@ func (r *kubeAPIImpl) Watch(updates UpdateEvent) (ShutdownChannel, error) {
 func (r kubeAPIImpl) createPodsWatch() (watch.Interface, error) {
 	glog.V(10).Infof("Creating a watcher for the kubernetes pods")
 	// step: lets retrieve a revision from which to work from
-	list, err := r.client.Pods(api.NamespaceAll).List(labels.Everything(), fields.Everything())
+	_, err := r.client.Pods(api.NamespaceAll).List(labels.Everything(), fields.Everything())
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve the list of pods, error: %s", err)
 	}
 
 	// step: create a channel for watching the nodes
-	ch, err := r.client.Pods(api.NamespaceAll).Watch(labels.Everything(), fields.Everything(),
-		api.ListOptions{ResourceVersion: list.ResourceVersion})
-
+	ch, err := r.client.Pods(api.NamespaceAll).Watch(unversioned.ListOptions{
+		LabelSelector: labels.Everything(),
+		FieldSelector: fields.Everything(),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to create a watch on pods resources, reason: %s", err)
 	}
@@ -196,12 +198,15 @@ func (r kubeAPIImpl) createPodsWatch() (watch.Interface, error) {
 func (r kubeAPIImpl) createNodesWatch() (watch.Interface, error) {
 	glog.V(10).Infof("Creating a watcher for the kubernetes nodes")
 	// step: lets retrieve a revision from which to work from
-	list, err := r.client.Nodes().List(labels.Everything(), fields.Everything())
+	_, err := r.client.Nodes().List(labels.Everything(), fields.Everything())
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve a list of nodes, error: %s", err)
 	}
 
-	nodeCh, err := r.client.Nodes().Watch(labels.Everything(), fields.Everything(), api.ListOptions{ResourceVersion: list.ResourceVersion})
+	nodeCh, err := r.client.Nodes().Watch(unversioned.ListOptions{
+		LabelSelector: labels.Everything(),
+		FieldSelector: fields.Everything(),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("unable to create a watch on node resources, reason: %s", err)
 	}
@@ -210,9 +215,9 @@ func (r kubeAPIImpl) createNodesWatch() (watch.Interface, error) {
 }
 
 // newAPIClient creates a new client to speak to the kubernetes api service
-func (r *kubeAPIImpl) newAPIClient() (*unversioned.Client, error) {
+func (r *kubeAPIImpl) newAPIClient() (*capi.Client, error) {
 	// step: create the configuration
-	cfg := unversioned.Config{
+	cfg := capi.Config{
 		Host:     getURL(),
 		Insecure: config.HTTPInsecure,
 		Version:  config.APIVersion,
@@ -239,13 +244,13 @@ func (r *kubeAPIImpl) newAPIClient() (*unversioned.Client, error) {
 	// check: are we using a cert to authenticate
 	if config.CaCertFile != "" {
 		cfg.Insecure = false
-		cfg.TLSClientConfig = unversioned.TLSClientConfig{
+		cfg.TLSClientConfig = capi.TLSClientConfig{
 			CAFile: config.CaCertFile,
 		}
 	}
 
 	// step: initialize the client
-	kube, err := unversioned.New(&cfg)
+	kube, err := capi.New(&cfg)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create a kubernetes api client, reason: %s", err)
 	}
